@@ -1,0 +1,11 @@
+{
+  "OracleHarnessModule#OracleHarness": "0xec4c3584dea83608a8a7fa775AD754573C9C3836",
+  "AccessManagerModule#AccessManager": "0xf01dB5B12E573cd9A06B8384f75b153345690e49",
+  "HookCreateImplModule#UniswapHook": "0xbFc609FF828410069F9b21D39a4484e5462A75b1",
+  "SlpCreateImplModule#SLP": "0xD5e689Fe68dd61735Fb14cbD84A7032B57B707d9",
+  "SlpCreateModule#SlpProxy": "0xda6a067D9435a28549D75Dd459C0016911c26E54",
+  "SlpCreateModule#SLP": "0xda6a067D9435a28549D75Dd459C0016911c26E54",
+  "SlpRolesModule#UniswapHook": "0x0A71509dfF50940945538B6c9137d26B1D4468A8",
+  "SlpOracleModule#SlpOracle": "0xd346e20420b980A8F31B2De716C156057C366B26",
+  "HookUpgradeImplModule#UniswapHook": "0x3aE3Db464C6904582a090e4beD464415B255Ce95"
+}

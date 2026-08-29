@@ -1,0 +1,48 @@
+{
+  "SivoCreateModule": {
+    "owner": "0xea802561d1F58f56B436048be8292E8B1211eA37"
+  },
+  "OracleHarnessModule": {
+    "price": "100000000",
+    "decimals": 8
+  },
+  "SlpOracleModule": {
+    "price": "100000000",
+    "decimals": 8,
+    "description": "SLP / USD"
+  },
+  "HookCreateImplModule": {
+    "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90"
+  },
+  "HookProxy": {
+    "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+    "usdc": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "usdt": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "oracle": "0xd346e20420b980A8F31B2De716C156057C366B26",
+    "price_min": "90000000",
+    "price_max": "150000000",
+    "max_staleness": "90000",
+    "min_request_shares": "1000000",
+    "usdc_oracle": {
+      "oracle": "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6",
+      "peg_min": "99500000",
+      "peg_max": "100500000",
+      "max_staleness": "90000"
+    },
+    "usdt_oracle": {
+      "oracle": "0x3E7d1eAB13ad0104d2750B8863b489D65364e32D",
+      "peg_min": "99500000",
+      "peg_max": "100500000",
+      "max_staleness": "90000"
+    }
+  },
+  "SlpRolesModule": {
+    "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
+    "usdc": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "usdt": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "hook": "0x0A71509dfF50940945538B6c9137d26B1D4468A8"
+  },
+  "HookUpgradeImplModule": {
+    "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90"
+  }
+}

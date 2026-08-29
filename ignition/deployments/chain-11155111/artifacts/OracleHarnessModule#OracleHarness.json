@@ -1,0 +1,206 @@
+{
+  "_format": "hh3-artifact-1",
+  "contractName": "OracleHarness",
+  "sourceName": "contracts/test/OracleHarness.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "int256",
+          "name": "price_",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "decimals_",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "description",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint80",
+          "name": "",
+          "type": "uint80"
+        }
+      ],
+      "name": "getRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestRoundData",
+      "outputs": [
+        {
+          "internalType": "uint80",
+          "name": "roundId",
+          "type": "uint80"
+        },
+        {
+          "internalType": "int256",
+          "name": "answer",
+          "type": "int256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "startedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "updatedAt",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint80",
+          "name": "answeredInRound",
+          "type": "uint80"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "priceAnswer",
+      "outputs": [
+        {
+          "internalType": "int256",
+          "name": "",
+          "type": "int256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "priceUpdatedAt",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "int256",
+          "name": "price_",
+          "type": "int256"
+        }
+      ],
+      "name": "setPrice",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "shouldRevert_",
+          "type": "bool"
+        }
+      ],
+      "name": "setShouldRevert",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "updatedAt_",
+          "type": "uint256"
+        }
+      ],
+      "name": "setUpdatedAt",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600e575f5ffd5b506040516103f33803806103f3833981016040819052602b91604b565b5f91909155426001556002805460ff191660ff909216919091179055607c565b5f5f60408385031215605b575f5ffd5b82519150602083015160ff811681146071575f5ffd5b809150509250929050565b61036a806100895f395ff3fe608060405234801561000f575f5ffd5b506004361061009b575f3560e01c80637284e416116100635780637284e4161461010e5780639a6fc8f51461013d578063b11c4eec14610187578063f7a308061461018f578063feaf968c146101a5575f5ffd5b80631ecc7d881461009f578063313ce567146100b45780633bd1c1f7146100ce57806354fd4d50146100df5780636813d787146100e6575b5f5ffd5b6100b26100ad366004610299565b600155565b005b60025460405160ff90911681526020015b60405180910390f35b5f545b6040519081526020016100c5565b60016100d1565b6100b26100f43660046102b0565b600280549115156101000261ff0019909216919091179055565b604080518082018252600d81526c4f7261636c654861726e65737360981b602082015290516100c591906102d6565b61015061014b36600461030b565b6101ad565b6040805169ffffffffffffffffffff968716815260208101959095528401929092526060830152909116608082015260a0016100c5565b6001546100d1565b6100b261019d366004610299565b5f5542600155565b610150610226565b5f5f5f5f5f600260019054906101000a900460ff161561020f5760405162461bcd60e51b815260206004820152601860248201527727b930b1b632a430b93732b9b99d103332b2b2103237bbb760411b60448201526064015b60405180910390fd5b50505f546001805490969195509350839250859150565b5f5f5f5f5f600260019054906101000a900460ff16156102835760405162461bcd60e51b815260206004820152601860248201527727b930b1b632a430b93732b9b99d103332b2b2103237bbb760411b6044820152606401610206565b50505f5460018054909591945092508291508490565b5f602082840312156102a9575f5ffd5b5035919050565b5f602082840312156102c0575f5ffd5b813580151581146102cf575f5ffd5b9392505050565b602081525f82518060208401528060208501604085015e5f604082850101526040601f19601f83011684010191505092915050565b5f6020828403121561031b575f5ffd5b813569ffffffffffffffffffff811681146102cf575f5ffdfea264697066735822122057c687ca0217e65ee3053dd38d7cbd3ac6314c96405b1fa0c040265befedaa9464736f6c63430008230033",
+  "deployedBytecode": "0x608060405234801561000f575f5ffd5b506004361061009b575f3560e01c80637284e416116100635780637284e4161461010e5780639a6fc8f51461013d578063b11c4eec14610187578063f7a308061461018f578063feaf968c146101a5575f5ffd5b80631ecc7d881461009f578063313ce567146100b45780633bd1c1f7146100ce57806354fd4d50146100df5780636813d787146100e6575b5f5ffd5b6100b26100ad366004610299565b600155565b005b60025460405160ff90911681526020015b60405180910390f35b5f545b6040519081526020016100c5565b60016100d1565b6100b26100f43660046102b0565b600280549115156101000261ff0019909216919091179055565b604080518082018252600d81526c4f7261636c654861726e65737360981b602082015290516100c591906102d6565b61015061014b36600461030b565b6101ad565b6040805169ffffffffffffffffffff968716815260208101959095528401929092526060830152909116608082015260a0016100c5565b6001546100d1565b6100b261019d366004610299565b5f5542600155565b610150610226565b5f5f5f5f5f600260019054906101000a900460ff161561020f5760405162461bcd60e51b815260206004820152601860248201527727b930b1b632a430b93732b9b99d103332b2b2103237bbb760411b60448201526064015b60405180910390fd5b50505f546001805490969195509350839250859150565b5f5f5f5f5f600260019054906101000a900460ff16156102835760405162461bcd60e51b815260206004820152601860248201527727b930b1b632a430b93732b9b99d103332b2b2103237bbb760411b6044820152606401610206565b50505f5460018054909591945092508291508490565b5f602082840312156102a9575f5ffd5b5035919050565b5f602082840312156102c0575f5ffd5b813580151581146102cf575f5ffd5b9392505050565b602081525f82518060208401528060208501604085015e5f604082850101526040601f19601f83011684010191505092915050565b5f6020828403121561031b575f5ffd5b813569ffffffffffffffffffff811681146102cf575f5ffdfea264697066735822122057c687ca0217e65ee3053dd38d7cbd3ac6314c96405b1fa0c040265befedaa9464736f6c63430008230033",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "immutableReferences": {},
+  "inputSourceName": "project/contracts/test/OracleHarness.sol",
+  "buildInfoId": "solc-0_8_35-8a9c14e9692540be9c45f56342b3d71b2fe0e4f3"
+}

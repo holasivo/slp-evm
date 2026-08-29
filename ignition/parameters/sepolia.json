@@ -1,0 +1,55 @@
+{
+  "USDTCreateModule": {
+    "owner": "0x9906A5c440B6F80F56b707ca646dad8F003AC171"
+  },
+  "OracleHarnessModule": {
+    "price": "100000000",
+    "decimals": 8
+  },
+  "SlpOracleModule": {
+    "price": "100000000",
+    "decimals": 8,
+    "description": "SLP / USD"
+  },
+  "MorphoHarnessModule": {
+    "price": "1000000000000000000000000000000000000"
+  },
+  "MultiplierCreateModule": {
+    "morpho": "0x8578a3089F6d49825299C1E924A2F78164c8Cf52",
+    "hook": "0x71E924F968797857675ebb21394d644f041868A8"
+  },
+  "HookCreateImplModule": {
+    "poolManager": "0xE03A1074c86CFeDd5C142C4F04F1a1536e203543"
+  },
+  "HookProxy": {
+    "poolManager": "0xE03A1074c86CFeDd5C142C4F04F1a1536e203543",
+    "usdc": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+    "usdt": "0x0131E6FeC0A697896BC5048F9d8a3F20A1162277",
+    "oracle": "0x73d7624688CD146F477C00d7ca4dcbbc0E243444",
+    "price_min": "50000000",
+    "price_max": "200000000",
+    "max_staleness": "86400",
+    "min_request_shares": "1000000",
+    "usdc_oracle": {
+      "oracle": "0x9084FcF7919153Da7D619ef72dB9Db7b71A81021",
+      "peg_min": "99500000",
+      "peg_max": "100500000",
+      "max_staleness": "0"
+    },
+    "usdt_oracle": {
+      "oracle": "0x9084FcF7919153Da7D619ef72dB9Db7b71A81021",
+      "peg_min": "99500000",
+      "peg_max": "100500000",
+      "max_staleness": "0"
+    }
+  },
+  "SlpRolesModule": {
+    "poolManager": "0xE03A1074c86CFeDd5C142C4F04F1a1536e203543",
+    "usdc": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+    "usdt": "0x0131E6FeC0A697896BC5048F9d8a3F20A1162277",
+    "hook": "0x71E924F968797857675ebb21394d644f041868A8"
+  },
+  "HookUpgradeImplModule": {
+    "poolManager": "0xE03A1074c86CFeDd5C142C4F04F1a1536e203543"
+  }
+}

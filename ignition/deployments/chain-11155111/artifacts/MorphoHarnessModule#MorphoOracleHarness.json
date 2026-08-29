@@ -1,0 +1,51 @@
+{
+  "_format": "hh3-artifact-1",
+  "contractName": "MorphoOracleHarness",
+  "sourceName": "contracts/test/MorphoHarness.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "price_",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "price",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "price_",
+          "type": "uint256"
+        }
+      ],
+      "name": "setPrice",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080604052348015600e575f5ffd5b5060405160f538038060f5833981016040819052602991602f565b5f556045565b5f60208284031215603e575f5ffd5b5051919050565b60a58060505f395ff3fe6080604052348015600e575f5ffd5b50600436106030575f3560e01c806391b7f5ed146034578063a035b1fe146045575b5f5ffd5b6043603f3660046059565b5f55565b005b5f5460405190815260200160405180910390f35b5f602082840312156068575f5ffd5b503591905056fea264697066735822122035497b528915cdf735232ff42f5d9855e573d614a637e21309b49849a708188c64736f6c63430008230033",
+  "deployedBytecode": "0x6080604052348015600e575f5ffd5b50600436106030575f3560e01c806391b7f5ed146034578063a035b1fe146045575b5f5ffd5b6043603f3660046059565b5f55565b005b5f5460405190815260200160405180910390f35b5f602082840312156068575f5ffd5b503591905056fea264697066735822122035497b528915cdf735232ff42f5d9855e573d614a637e21309b49849a708188c64736f6c63430008230033",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "immutableReferences": {},
+  "inputSourceName": "project/contracts/test/MorphoHarness.sol",
+  "buildInfoId": "solc-0_8_35-933b54e72903972833ceef7df3ae5cb2be2f2575"
+}

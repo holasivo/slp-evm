@@ -1,0 +1,53 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_35-8a9c14e9692540be9c45f56342b3d71b2fe0e4f3",
+  "solcVersion": "0.8.35",
+  "solcLongVersion": "0.8.35+commit.47b9dedd",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.12.0"
+  },
+  "userSourceNameMap": {
+    "contracts/test/OracleHarness.sol": "project/contracts/test/OracleHarness.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": [
+        "project/:@chainlink/contracts/=npm/@chainlink/contracts@1.5.0/"
+      ]
+    },
+    "sources": {
+      "npm/@chainlink/contracts@1.5.0/src/v0.8/shared/interfaces/AggregatorV3Interface.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\n// solhint-disable-next-line interface-starts-with-i\ninterface AggregatorV3Interface {\n  function decimals() external view returns (uint8);\n\n  function description() external view returns (string memory);\n\n  function version() external view returns (uint256);\n\n  function getRoundData(\n    uint80 _roundId\n  ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\n\n  function latestRoundData()\n    external\n    view\n    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\n}\n"
+      },
+      "project/contracts/test/OracleHarness.sol": {
+        "content": "// SPDX-License-Identifier: BUSL-1.1\npragma solidity 0.8.35;\n\nimport \"@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol\";\n\ncontract OracleHarness is AggregatorV3Interface {\n    int256 private _price;\n    uint256 private _updatedAt;\n    uint8 private _decimals;\n    bool private _shouldRevert;\n\n    constructor(int256 price_, uint8 decimals_) {\n        _price = price_;\n        _updatedAt = block.timestamp;\n        _decimals = decimals_;\n    }\n\n    function setPrice(int256 price_) external {\n        _price = price_;\n        _updatedAt = block.timestamp;\n    }\n\n    function setUpdatedAt(uint256 updatedAt_) external {\n        _updatedAt = updatedAt_;\n    }\n\n    /// @notice Simulates a reverting or sunset feed for testing the try/catch\n    /// guard around the oracle read.\n    function setShouldRevert(bool shouldRevert_) external {\n        _shouldRevert = shouldRevert_;\n    }\n\n    /// @notice Exposes the stored oracle answer for Certora rules.\n    /// @dev Certora reads `latestRoundData()` returns through a tuple\n    /// which is awkward to unpack in CVL; this getter exposes the same\n    /// slot as a single scalar.\n    function priceAnswer() external view returns (int256) {\n        return _price;\n    }\n\n    /// @notice Exposes the stored `updatedAt` timestamp for Certora rules.\n    function priceUpdatedAt() external view returns (uint256) {\n        return _updatedAt;\n    }\n\n    function decimals() external view returns (uint8) {\n        return _decimals;\n    }\n\n    function description() external pure returns (string memory) {\n        return \"OracleHarness\";\n    }\n\n    function version() external pure returns (uint256) {\n        return 1;\n    }\n\n    function getRoundData(\n        uint80\n    )\n        external\n        view\n        returns (\n            uint80 roundId,\n            int256 answer,\n            uint256 startedAt,\n            uint256 updatedAt,\n            uint80 answeredInRound\n        )\n    {\n        if (_shouldRevert) revert(\"OracleHarness: feed down\");\n        return (1, _price, _updatedAt, _updatedAt, 1);\n    }\n\n    function latestRoundData()\n        external\n        view\n        returns (\n            uint80 roundId,\n            int256 answer,\n            uint256 startedAt,\n            uint256 updatedAt,\n            uint80 answeredInRound\n        )\n    {\n        if (_shouldRevert) revert(\"OracleHarness: feed down\");\n        return (1, _price, _updatedAt, _updatedAt, 1);\n    }\n}\n"
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+# Secrets — never commit env files to this public repository
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules
+
+# Build output (anchored: ignition/deployments/*/artifacts is tracked)
+/dist
+/artifacts
+/cache
+coverage
+coverage.json
+typechain
+typechain-types
+
+# Certora
+.certora_internal
+emv-*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editors / OS
+.idea
+.DS_Store
+*.suo
+*.sw?
