@@ -79,6 +79,50 @@ function cvl_mulDivRounding(
     return require_uint256(result);
 }
 
+/**
+ * CVL summaries for OpenZeppelin's SafeERC20 internal wrappers. Since OZ 5.6
+ * the wrappers hand-roll their calldata in assembly scratch space, so the
+ * Prover cannot resolve the callee or the selector at the raw `call` site and
+ * the unresolved-call DISPATCH admits branches no real execution takes (e.g.
+ * an inbound transferFrom that "succeeds" without moving tokens, breaking
+ * pendingSharesBackingPreserved on requestWithdraw). Summarizing at the
+ * internal boundary routes each wrapper to the real in-scene token code with
+ * the hook as msg.sender — exactly the concrete semantics. A token outside
+ * the scene (unreachable: every token the hook touches is pinned by
+ * requireConfigured) is a no-op.
+ */
+function cvlSafeTransfer(address token, address to, uint256 value) {
+    env e;
+    require e.msg.sender == currentContract,
+        "SafeERC20 is only ever invoked by the hook, so the token sees the hook as msg.sender";
+    require e.msg.value == 0, "ERC-20 transfer is not payable";
+    bool ok = true;
+    if (token == slpToken) {
+        ok = slpToken.transfer(e, to, value);
+    } else if (token == asset0Token) {
+        ok = asset0Token.transfer(e, to, value);
+    } else if (token == asset1Token) {
+        ok = asset1Token.transfer(e, to, value);
+    }
+    require ok, "SafeERC20.safeTransfer reverts when the token returns false; the summary mirrors that revert by pruning the path";
+}
+
+function cvlSafeTransferFrom(address token, address from, address to, uint256 value) {
+    env e;
+    require e.msg.sender == currentContract,
+        "SafeERC20 is only ever invoked by the hook, so the token sees the hook as msg.sender";
+    require e.msg.value == 0, "ERC-20 transferFrom is not payable";
+    bool ok = true;
+    if (token == slpToken) {
+        ok = slpToken.transferFrom(e, from, to, value);
+    } else if (token == asset0Token) {
+        ok = asset0Token.transferFrom(e, from, to, value);
+    } else if (token == asset1Token) {
+        ok = asset1Token.transferFrom(e, from, to, value);
+    }
+    require ok, "SafeERC20.safeTransferFrom reverts when the token returns false; the summary mirrors that revert by pruning the path";
+}
+
 methods {
     // Hook views (envfree - pure storage reads)
     function authority() external returns (address) envfree;
@@ -101,7 +145,9 @@ methods {
     function slpToken.balanceOf(address) external returns (uint256) envfree;
     function slpToken.totalSupply() external returns (uint256) envfree;
     function asset0Token.balanceOf(address) external returns (uint256) envfree;
+    function asset0Token.totalSupply() external returns (uint256) envfree;
     function asset1Token.balanceOf(address) external returns (uint256) envfree;
+    function asset1Token.totalSupply() external returns (uint256) envfree;
 
     // Dispatchers for the hook's external calls to in-scene contracts. The
     // receivers are storage values (never statically resolvable), so every
@@ -120,6 +166,17 @@ methods {
     // set of non-reverting executions).
     function _.canCall(address, address, bytes4) external => NONDET;
 
+    // The AccessManager's delayed-execution entry point: when canCall reports
+    // a nonzero delay, OZ's `restricted` modifier calls
+    // IAccessManager(authority()).consumeScheduledOp(caller, data). The
+    // authority is out of scene, so without a summary this call AUTO-havocs
+    // the entire scene — token balances included — manufacturing phantom
+    // counterexamples on every restricted method (even pause()). The real
+    // AccessManager only mutates its own schedule bookkeeping, never the
+    // scene contracts, so NONDET is sound here for the same reason it is
+    // for canCall.
+    function _.consumeScheduledOp(address, bytes) external => NONDET;
+
     // KEY: summarize Math.mulDiv with CVL functions to bypass the nonlinear
     // OpenZeppelin assembly (see rwa.spec for the timeout postmortem that
     // motivated this pattern).
@@ -127,10 +184,32 @@ methods {
     function _.mulDiv(uint256 x, uint256 y, uint256 d, Math.Rounding rounding) internal =>
         cvl_mulDivRounding(x, y, d, rounding) expect uint256;
 
-    // PoolManager calls (sync/settle/take) and SafeERC20's assembly call()
-    // sites are unresolved. Dispatch token signatures to the in-scene
-    // ERC-20s; everything else (the out-of-scene PoolManager) becomes a
-    // non-state-modifying NONDET instead of a storage havoc.
+    // Summarize the SafeERC20 wrappers at the internal boundary (see the
+    // cvlSafeTransfer* rationale above): OZ 5.6's scratch-space assembly
+    // hides the callee and selector from the Prover, so the raw call sites
+    // would otherwise fall into the unresolved-call DISPATCH below and admit
+    // no-op / wrong-token branches no real execution takes.
+    function SafeERC20.safeTransfer(address token, address to, uint256 value) internal =>
+        cvlSafeTransfer(token, to, value);
+    function SafeERC20.safeTransferFrom(address token, address from, address to, uint256 value) internal =>
+        cvlSafeTransferFrom(token, from, to, value);
+
+    // PoolManager entry points are typed interface calls: their sighash
+    // resolves but the callee (the out-of-scene `poolManager` immutable)
+    // never does, so the unresolved-call fallback below — which only covers
+    // calls whose sighash is ALSO unknown — does not apply and the Prover
+    // would AUTO-havoc the whole scene (token balances included) on every
+    // beforeSwap. Explicit NONDET restores the documented over-approximation:
+    // no state effect, arbitrary return values. Currency is a user-defined
+    // value type over address, so `address` yields the correct selectors.
+    function _.take(address, address, uint256) external => NONDET;
+    function _.sync(address) external => NONDET;
+    function _.settle() external => NONDET;
+
+    // SafeERC20's scratch-space assembly call() sites are unresolved in both
+    // callee and sighash (belt to the internal-summary suspenders above).
+    // Dispatch token signatures to the in-scene ERC-20s; everything else
+    // becomes a non-state-modifying NONDET instead of a storage havoc.
     unresolved external in _._ =>
         DISPATCH [
             _.transfer(address, uint256),
@@ -209,6 +288,32 @@ function requireExternalSender(address sender) {
     require sender != oracleFeed, "Sender must not be the price feed";
 }
 
+/**
+ * Pre-state: the ERC-20 supply invariant. In every reachable token state the
+ * balances sum to totalSupply, so any two distinct accounts' balances are
+ * together bounded by it. The symbolic pre-state does not know this, which
+ * lets OpenZeppelin's deliberately unchecked recipient-side balance addition
+ * (safe onchain precisely because of this invariant) wrap a near-2^256 hook
+ * balance around zero on any inbound transfer or mint, manufacturing phantom
+ * solvency violations. Constraining the two accounts that actually move
+ * funds — the hook and the external actor — excludes exactly those
+ * unreachable states: with balanceOf(hook) <= totalSupply, a mint cannot
+ * wrap (its checked totalSupply increment reverts first), and with the pair
+ * bounded, a transferFrom cannot either (the amount is capped by the
+ * sender's balance).
+ */
+function requireSupplyInvariant(address actor) {
+    require slpToken.balanceOf(currentContract) + slpToken.balanceOf(actor)
+            <= to_mathint(slpToken.totalSupply()),
+        "ERC-20 invariant: two distinct accounts' SLP balances cannot exceed the total supply";
+    require asset0Token.balanceOf(currentContract) + asset0Token.balanceOf(actor)
+            <= to_mathint(asset0Token.totalSupply()),
+        "ERC-20 invariant: two distinct accounts' asset0 balances cannot exceed the total supply";
+    require asset1Token.balanceOf(currentContract) + asset1Token.balanceOf(actor)
+            <= to_mathint(asset1Token.totalSupply()),
+        "ERC-20 invariant: two distinct accounts' asset1 balances cannot exceed the total supply";
+}
+
 /** Pre-state: both solvency invariants hold (established at deployment,
  *  where every balance and queue total is zero). */
 function requireSolvencyPre() {
@@ -243,18 +348,25 @@ function requireSolvencyPre() {
  * proxy runs it exactly once at deployment, where all balances and reserves
  * are zero), and so is `upgradeToAndCall` (Safe-gated; it swaps out the very
  * code under verification, so "preservation across an arbitrary new
- * implementation" is not a meaningful property).
+ * implementation" is not a meaningful property). `beforeAddLiquidity` and
+ * `beforeDonate` revert unconditionally by design (the pools hold no curve
+ * liquidity and accept no donations), so they preserve every invariant
+ * vacuously; they are filtered so the vacuity sanity check does not flag
+ * them, and their always-revert behavior is pinned by the unit tests.
  */
 rule claimReserveBackingPreserved(env e, method f, calldataarg args)
     filtered {
         f ->
             f.contract == currentContract &&
             f.selector != sig:initialize(UniswapHookOptions.Options).selector &&
-            f.selector != sig:upgradeToAndCall(address, bytes).selector
+            f.selector != sig:upgradeToAndCall(address, bytes).selector &&
+            f.selector != sig:beforeAddLiquidity(address, UniswapHook.PoolKey, UniswapHook.ModifyLiquidityParams, bytes).selector &&
+            f.selector != sig:beforeDonate(address, UniswapHook.PoolKey, uint256, uint256, bytes).selector
     }
 {
     requireConfigured();
     requireExternalSender(e.msg.sender);
+    requireSupplyInvariant(e.msg.sender);
     requireSolvencyPre();
 
     f(e, args);
@@ -291,11 +403,14 @@ rule pendingSharesBackingPreserved(env e, method f, calldataarg args)
         f ->
             f.contract == currentContract &&
             f.selector != sig:initialize(UniswapHookOptions.Options).selector &&
-            f.selector != sig:upgradeToAndCall(address, bytes).selector
+            f.selector != sig:upgradeToAndCall(address, bytes).selector &&
+            f.selector != sig:beforeAddLiquidity(address, UniswapHook.PoolKey, UniswapHook.ModifyLiquidityParams, bytes).selector &&
+            f.selector != sig:beforeDonate(address, UniswapHook.PoolKey, uint256, uint256, bytes).selector
     }
 {
     requireConfigured();
     requireExternalSender(e.msg.sender);
+    requireSupplyInvariant(e.msg.sender);
     requireSolvencyPre();
 
     f(e, args);

@@ -47,10 +47,9 @@ npm install
 
 ### 3. Run the Specifications
 
-All commands must be run from the `blockchain-evm` directory:
+All commands must be run from the repository root:
 
 ```bash
-cd blockchain-evm
 certoraRun certora/conf/hook.conf
 ```
 
