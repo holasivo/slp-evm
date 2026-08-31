@@ -105,6 +105,31 @@ describe('Multiplier', () => {
     });
   });
 
+  describe('upgrade', () => {
+    it('upgrades via the UPGRADER role and keeps config', async () => {
+      const { multiplier, usdc, market } =
+        await nh.loadFixture(makeMultiplyProtocol);
+      const newImpl = await viem.deployContract('Multiplier');
+      await multiplier.write.upgradeToAndCall([newImpl.address, '0x']);
+      expect(await multiplier.read.marketOf([usdc.address])).to.deep.equal(
+        market,
+      );
+    });
+
+    it('rejects upgrades from non-upgrader callers', async () => {
+      const { multiplier, users } = await nh.loadFixture(makeMultiplyProtocol);
+      const [amy] = users;
+      const a = toAddressMap({ amy });
+      const newImpl = await viem.deployContract('Multiplier');
+      await viem.assertions.revertWithCustomErrorWithArgs(
+        Ξ(amy, multiplier).write.upgradeToAndCall([newImpl.address, '0x']),
+        multiplier,
+        'AccessManagedUnauthorized',
+        [a.amy],
+      );
+    });
+  });
+
   describe('setMarket', () => {
     it('configures a second market for USDT', async () => {
       const { multiplier, usdt, slp, morphoOracle } =

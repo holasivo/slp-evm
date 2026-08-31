@@ -154,7 +154,7 @@ describe('SLP', () => {
   });
 
   describe('upgrade', () => {
-    it('upgrades via the AccessManager admin and keeps state', async () => {
+    it('upgrades via the UPGRADER role and keeps state', async () => {
       const { slp, users } = await nh.loadFixture(makeSlpProtocol);
       const [amy] = users;
       const a = toAddressMap({ amy });
@@ -165,7 +165,7 @@ describe('SLP', () => {
       expect(await slp.read.symbol()).to.equal('SLP');
     });
 
-    it('rejects upgrades from non-admin callers', async () => {
+    it('rejects upgrades from non-upgrader callers', async () => {
       const { slp, users } = await nh.loadFixture(makeSlpProtocol);
       const [amy] = users;
       const a = toAddressMap({ amy });
@@ -175,6 +175,20 @@ describe('SLP', () => {
         slp,
         'AccessManagedUnauthorized',
         [a.amy],
+      );
+    });
+
+    it('rejects upgrades from ADMIN once UPGRADER is revoked', async () => {
+      const { slp, accessManager, owner } =
+        await nh.loadFixture(makeSlpProtocol);
+      const a = toAddressMap({ owner });
+      await accessManager.write.revokeRole([Roles.UPGRADER, a.owner]);
+      const newImpl = await viem.deployContract('SLP');
+      await viem.assertions.revertWithCustomErrorWithArgs(
+        slp.write.upgradeToAndCall([newImpl.address, '0x']),
+        slp,
+        'AccessManagedUnauthorized',
+        [a.owner],
       );
     });
   });

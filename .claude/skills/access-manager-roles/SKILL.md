@@ -1,6 +1,6 @@
 ---
 name: access-manager-roles
-description: Regenerate the AccessManager role membership table, grouped by address, for any deployed chain (mainnet, sepolia, …). Use this whenever the user asks who holds which AccessManager roles, wants the role membership table refreshed, asks "which wallets have ADMIN/MANAGER/OPERATOR/PAUSER/MINTER", or wants to audit role grants/revocations or function-role wiring on the deployed contracts — even if they just say "show me the roles" or paste the AccessManager's Etherscan link.
+description: Regenerate the AccessManager role membership table, grouped by address, for any deployed chain (mainnet, sepolia, …). Use this whenever the user asks who holds which AccessManager roles, wants the role membership table refreshed, asks "which wallets have ADMIN/MANAGER/OPERATOR/PAUSER/MINTER/UPGRADER", or wants to audit role grants/revocations or function-role wiring on the deployed contracts — even if they just say "show me the roles" or paste the AccessManager's Etherscan link.
 ---
 
 # AccessManager role membership table
@@ -57,5 +57,6 @@ One table per chain when auditing several. After the table, mention anything
 security-relevant you noticed in passing: addresses holding many roles (especially
 ADMIN + others), revocations, non-zero `delay` values (all grants so far have
 `delay: 0` — call it out if that changes), or function-role remappings. Remember role 0
-is AccessManager's built-in ADMIN and unmapped selectors (e.g. `upgradeToAndCall`)
-default to it.
+is AccessManager's built-in ADMIN and unmapped selectors default to it;
+`upgradeToAndCall` is deliberately mapped to UPGRADER (5) on SLP, UniswapHook, and
+Multiplier — flag any chain where that mapping is missing.

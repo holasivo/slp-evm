@@ -17,6 +17,9 @@ export const SlpRolesModule = buildModule('SlpRolesModule', (m) => {
   const opsOperator = m.getParameter('opsOperator', d.owner);
   const opsPauser = m.getParameter('opsPauser', d.owner);
   const opsMinter = m.getParameter('opsMinter', d.owner);
+  // upgrades sit on their own role so they can be timelocked later without
+  // delaying everything ADMIN does; the Safe should hold this on mainnet
+  const opsUpgrader = m.getParameter('opsUpgrader', d.owner);
   const { proxy: slp, accessManager } = m.useModule(SlpCreateModule);
 
   // function-role mappings
@@ -46,6 +49,9 @@ export const SlpRolesModule = buildModule('SlpRolesModule', (m) => {
   });
   m.call(accessManager, 'grantRole', [Roles.PAUSER, opsPauser, 0], {
     id: 'grantPauserOps',
+  });
+  m.call(accessManager, 'grantRole', [Roles.UPGRADER, opsUpgrader, 0], {
+    id: 'grantUpgraderOps',
   });
 
   return { hook, slp, accessManager };

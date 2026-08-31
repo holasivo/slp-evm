@@ -27,7 +27,8 @@
     "multiplier:create": "hardhat ignition deploy ./ignition/modules/multiplier/create.ts --verify",
     "oracle:create": "hardhat ignition deploy ./ignition/modules/oracle/create.ts --verify",
     "oracle:harness": "hardhat ignition deploy ./ignition/modules/test/OracleHarness.ts",
-    "roles:audit": "vite-node ./scripts/access-manager-events.ts"
+    "roles:audit": "vite-node ./scripts/access-manager-events.ts",
+    "roles:propose-upgrader": "hardhat run ./scripts/propose-upgrader-role.ts"
   },
   "devDependencies": {
     "@chainlink/contracts": "^1.5.0",

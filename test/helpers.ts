@@ -200,13 +200,12 @@ export const buildMakeSlpProtocol = (
     for (const { role, selectors: sels } of HookFunctionRoles) {
       await am.write.setTargetFunctionRole([hook.address, [...sels], role]);
     }
-    // upgradeToAndCall stays on the built-in ADMIN role (0), which `owner`
-    // already holds via the AccessManager constructor
     await am.write.grantRole([Roles.MINTER, hook.address, 0]);
     await am.write.grantRole([Roles.MINTER, owner, 0]);
     await am.write.grantRole([Roles.MANAGER, owner, 0]);
     await am.write.grantRole([Roles.OPERATOR, owner, 0]);
     await am.write.grantRole([Roles.PAUSER, owner, 0]);
+    await am.write.grantRole([Roles.UPGRADER, owner, 0]);
 
     // Initialize both sanctioned pools (init price is cosmetic)
     const keyFor = (asset: Address) => {
