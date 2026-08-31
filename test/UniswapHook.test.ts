@@ -1609,7 +1609,7 @@ describe('UniswapHook', () => {
       expect(await usdc.read.balanceOf([a.amy])).to.equal($(70));
     });
 
-    it('rejects upgrades from non-admin callers', async () => {
+    it('rejects upgrades from non-upgrader callers', async () => {
       const { hook, poolManager, users } =
         await nh.loadFixture(makeSlpProtocol);
       const [amy] = users;
@@ -1622,6 +1622,22 @@ describe('UniswapHook', () => {
         hook,
         'AccessManagedUnauthorized',
         [a.amy],
+      );
+    });
+
+    it('rejects upgrades from ADMIN once UPGRADER is revoked', async () => {
+      const { hook, accessManager, poolManager, owner } =
+        await nh.loadFixture(makeSlpProtocol);
+      const a = toAddressMap({ owner });
+      await accessManager.write.revokeRole([Roles.UPGRADER, a.owner]);
+      const newImpl = await viem.deployContract('UniswapHookHarness', [
+        poolManager.address,
+      ]);
+      await viem.assertions.revertWithCustomErrorWithArgs(
+        hook.write.upgradeToAndCall([newImpl.address, '0x']),
+        hook,
+        'AccessManagedUnauthorized',
+        [a.owner],
       );
     });
   });

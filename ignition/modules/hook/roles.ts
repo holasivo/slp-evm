@@ -2,16 +2,22 @@ import { toFunctionSelector } from 'viem';
 
 /// Central AccessManager role ids shared by deployment and tests.
 /// Role 0 is AccessManager's built-in ADMIN_ROLE; unmapped functions
-/// (e.g. upgradeToAndCall) require it by default.
+/// require it by default. upgradeToAndCall is mapped to UPGRADER so
+/// upgrades can be timelocked without delaying everything ADMIN does.
 export const Roles = {
   ADMIN: 0n,
   MANAGER: 1n,
   OPERATOR: 2n,
   PAUSER: 3n,
   MINTER: 4n,
+  UPGRADER: 5n,
 } as const;
 
 const sel = (signatures: string[]) => signatures.map(toFunctionSelector);
+
+export const upgradeSelectors = sel([
+  'function upgradeToAndCall(address,bytes)',
+]);
 
 /// Function-role mappings applied to the SLP token
 export const SlpFunctionRoles = [
@@ -20,6 +26,7 @@ export const SlpFunctionRoles = [
     role: Roles.PAUSER,
     selectors: sel(['function pause()', 'function unpause()']),
   },
+  { role: Roles.UPGRADER, selectors: upgradeSelectors },
 ] as const;
 
 /// Function-role mappings applied to the Multiplier
@@ -34,6 +41,7 @@ export const MultiplierFunctionRoles = [
     role: Roles.PAUSER,
     selectors: sel(['function pause()', 'function unpause()']),
   },
+  { role: Roles.UPGRADER, selectors: upgradeSelectors },
 ] as const;
 
 /// Function-role mappings applied to the SlpOracle
@@ -66,4 +74,5 @@ export const HookFunctionRoles = [
     role: Roles.PAUSER,
     selectors: sel(['function pause()', 'function unpause()']),
   },
+  { role: Roles.UPGRADER, selectors: upgradeSelectors },
 ] as const;
