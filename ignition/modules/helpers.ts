@@ -54,7 +54,10 @@ export const proposeSafeTransaction = async (params: SafeProposalParams) => {
   const kit = await Safe.init({ provider: rpcUrl, signer, safeAddress });
   const apiKit = new SafeApiKit({ chainId: BigInt(chainId), apiKey });
   const hashes: string[] = [];
-  let nonce = await kit.getNonce();
+  // Queue-aware: the on-chain nonce ignores proposals already pending in the
+  // transaction service, which would make a new proposal conflict with them
+  // instead of following them.
+  let nonce = Number(await apiKit.getNextNonce(safeAddress));
   for (const tx of txs) {
     const transactions = [{ ...tx, operation: 0 }];
     const options = { nonce: nonce++ };
