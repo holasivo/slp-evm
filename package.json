@@ -28,6 +28,7 @@
     "oracle:create": "hardhat ignition deploy ./ignition/modules/oracle/create.ts --verify",
     "oracle:harness": "hardhat ignition deploy ./ignition/modules/test/OracleHarness.ts",
     "roles:audit": "vite-node ./scripts/access-manager-events.ts",
+    "queue:show": "vite-node ./scripts/withdrawal-queue.ts",
     "roles:propose-upgrader": "hardhat run ./scripts/propose-upgrader-role.ts"
   },
   "devDependencies": {
