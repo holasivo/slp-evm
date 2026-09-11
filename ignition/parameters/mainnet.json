@@ -18,7 +18,7 @@
     "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90",
     "usdc": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
     "usdt": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    "oracle": "0xd346e20420b980A8F31B2De716C156057C366B26",
+    "oracle": "0x0e095dD47bdE0d7cdb57a72bB98B6419dfBB505b",
     "price_min": "90000000",
     "price_max": "150000000",
     "max_staleness": "90000",
