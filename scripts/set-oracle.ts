@@ -1,8 +1,9 @@
 /**
- * Points the UniswapHook at the deployed SlpOracle. Run AFTER oracle:create.
+ * Points the UniswapHook at the deployed SlpTestOracle (test chains only).
+ * Run AFTER oracle:test.
  *
  * The oracle address is read from the network's Ignition journal
- * (SlpOracleModule#SlpOracle); the hook address and price band are read from
+ * (SlpTestOracleModule#SlpTestOracle); the hook address and price band are read from
  * the network's parameters file (SlpRolesModule.hook and HookProxy), so the
  * cutover cannot drift from the deployed configuration. The caller must hold
  * the MANAGER role on the AccessManager. Idempotent: exits early when the
@@ -58,8 +59,9 @@ async function main(): Promise<void> {
       'utf-8',
     ),
   ) as Record<string, Address>;
-  const oracle = deployed['SlpOracleModule#SlpOracle'];
-  if (!oracle) throw new Error('SlpOracleModule#SlpOracle not deployed');
+  const oracle = deployed['SlpTestOracleModule#SlpTestOracle'];
+  if (!oracle)
+    throw new Error('SlpTestOracleModule#SlpTestOracle not deployed');
 
   const hookArtifact = await hre.artifacts.readArtifact('UniswapHook');
   const publicClient = await n.viem.getPublicClient();
@@ -71,7 +73,7 @@ async function main(): Promise<void> {
     functionName: 'oracle',
   })) as Address;
   if (getAddress(current) === getAddress(oracle)) {
-    console.log(`hook already points at SlpOracle ${oracle}; skipping`);
+    console.log(`hook already points at SlpTestOracle ${oracle}; skipping`);
     return;
   }
 

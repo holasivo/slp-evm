@@ -6,10 +6,9 @@
     "price": "100000000",
     "decimals": 8
   },
-  "SlpOracleModule": {
-    "price": "100000000",
-    "decimals": 8,
-    "description": "SLP / USD"
+  "SlpTestOracleModule": {
+    "apy_bps": "1130",
+    "decimals": 8
   },
   "MorphoHarnessModule": {
     "price": "1000000000000000000000000000000000000"
@@ -25,7 +24,7 @@
     "poolManager": "0xE03A1074c86CFeDd5C142C4F04F1a1536e203543",
     "usdc": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
     "usdt": "0x0131E6FeC0A697896BC5048F9d8a3F20A1162277",
-    "oracle": "0x73d7624688CD146F477C00d7ca4dcbbc0E243444",
+    "oracle": "0x9fab452E4fb93b60b22Bc5c5dbAD3BFc36A6fc3A",
     "price_min": "50000000",
     "price_max": "200000000",
     "max_staleness": "86400",

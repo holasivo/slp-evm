@@ -77,12 +77,21 @@ The hook proxy's address must encode its permission flags in the low 14 bits
 npm run slp:create -- --network {xyz} --parameters ./ignition/parameters/{xyz}.json
 ```
 
-On testnets without a Chainlink SLP/USD feed, first deploy the mock feed and
-put its address into the `HookProxy.oracle` parameter:
+On testnets without Chainlink feeds, first deploy the test feeds and put
+their addresses into the `HookProxy` parameters. The self-accruing
+`SlpTestOracle` (reads 1.00 at deployment, grows linearly at
+`SlpTestOracleModule.apy_bps` per year and is never stale, so no publisher is
+needed) goes into `HookProxy.oracle`; the fixed-price `OracleHarness` serves
+as the stablecoin peg feed in `HookProxy.usdc_oracle` / `usdt_oracle`:
 
 ```bash
+npm run oracle:test -- --network {xyz} --parameters ./ignition/parameters/{xyz}.json
 npm run oracle:harness -- --network {xyz} --parameters ./ignition/parameters/{xyz}.json
 ```
+
+On a running testnet, re-point the hook at a freshly deployed test feed with
+`npx hardhat run scripts/set-oracle.ts --network {xyz}` (caller must hold
+MANAGER) and change the rate later via `SlpTestOracle.setApy` (owner).
 
 ### 2. Mine and deploy the hook proxy
 

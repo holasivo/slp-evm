@@ -4,8 +4,8 @@
  *
  *   UniswapHook.setOracle(<feed>, maxStaleness, priceMin, priceMax)
  *
- * Used to migrate the hook off Sivo's own SlpOracle and onto the Chainlink
- * SLP / USD Exchange Rate feed. setOracle takes the feed and its band
+ * Used to migrate the hook off the operator-published SlpOracle (since
+ * removed from the repo) and onto the Chainlink SLP / USD Exchange Rate feed. setOracle takes the feed and its band
  * atomically so a feed with different decimals can never inherit a band
  * expressed in the old decimal basis.
  *

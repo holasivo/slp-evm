@@ -44,14 +44,6 @@ export const MultiplierFunctionRoles = [
   { role: Roles.UPGRADER, selectors: upgradeSelectors },
 ] as const;
 
-/// Function-role mappings applied to the SlpOracle
-export const OracleFunctionRoles = [
-  {
-    role: Roles.OPERATOR,
-    selectors: sel(['function setPrice(int256)']),
-  },
-] as const;
-
 /// Function-role mappings applied to the UniswapHook
 export const HookFunctionRoles = [
   {

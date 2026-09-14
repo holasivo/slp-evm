@@ -30,5 +30,6 @@
   "MultiplierCreateModule#MultiplierProxy": "0xd66b2BCD3855ABfE28d8c4AB9823140E33e7f8c0",
   "MultiplierCreateModule#Multiplier": "0xd66b2BCD3855ABfE28d8c4AB9823140E33e7f8c0",
   "SlpOracleModule#SlpOracle": "0x73d7624688CD146F477C00d7ca4dcbbc0E243444",
-  "HookUpgradeImplModule#UniswapHook": "0x22980088F58738d30466DBCcbe549033170Bb0bD"
+  "HookUpgradeImplModule#UniswapHook": "0x22980088F58738d30466DBCcbe549033170Bb0bD",
+  "SlpTestOracleModule#SlpTestOracle": "0x9fab452E4fb93b60b22Bc5c5dbAD3BFc36A6fc3A"
 }

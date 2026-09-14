@@ -6,11 +6,6 @@
     "price": "100000000",
     "decimals": 8
   },
-  "SlpOracleModule": {
-    "price": "100000000",
-    "decimals": 8,
-    "description": "SLP / USD"
-  },
   "HookCreateImplModule": {
     "poolManager": "0x000000000004444c5dc75cB358380D2e3dE08A90"
   },

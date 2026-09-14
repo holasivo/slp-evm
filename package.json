@@ -26,7 +26,7 @@
     "hook:propose-asset-oracles": "hardhat run ./scripts/propose-hook-asset-oracles.ts",
     "hook:propose-oracle": "hardhat run ./scripts/propose-hook-oracle.ts",
     "multiplier:create": "hardhat ignition deploy ./ignition/modules/multiplier/create.ts --verify",
-    "oracle:create": "hardhat ignition deploy ./ignition/modules/oracle/create.ts --verify",
+    "oracle:test": "hardhat ignition deploy ./ignition/modules/test/SlpTestOracle.ts --verify",
     "oracle:harness": "hardhat ignition deploy ./ignition/modules/test/OracleHarness.ts",
     "roles:audit": "vite-node ./scripts/access-manager-events.ts",
     "queue:show": "vite-node ./scripts/withdrawal-queue.ts",
