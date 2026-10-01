@@ -1,6 +1,6 @@
 ---
 name: withdrawal-queue
-description: Show the current state of the UniswapHook withdrawal (redeem) queue for USDC and USDT on any deployed chain (mainnet, sepolia, …) — live unfilled requests, pending SLP, claimable stablecoin, hook balance, and the request/fill/cancel/claim history. Use whenever the user asks about the withdrawal queue, redemption queue, pending or unfilled redemptions, "who is waiting to withdraw", how much is claimable or needs replenishing, whether a request was filled, or asks to "show me the queue" — even if they don't name the hook contract.
+description: Show the current state of the UniswapHook withdrawal (redeem) queue for USDC and USDT on Ethereum mainnet (Sepolia only when explicitly asked for testing) — live unfilled requests, pending SLP, claimable stablecoin, hook balance, and the request/fill/cancel/claim history. Use whenever the user asks about the withdrawal queue, redemption queue, pending or unfilled redemptions, "who is waiting to withdraw", how much is claimable or needs replenishing, whether a request was filled, or asks to "show me the queue" — even if they don't name the hook contract.
 ---
 
 # UniswapHook withdrawal queue
@@ -16,7 +16,9 @@ inbound deposits / `fill` / operator `replenish` (price locked at fill) → `cla
 npm run queue:show -- --chain 1 --pretty
 ```
 
-Omit `--chain` for every deployed chain; omit `--pretty` for JSON. The script
+**Default to mainnet (`--chain 1`).** Only query Sepolia (`--chain 11155111`) when
+the user explicitly asks for it (e.g. for testing); never omit `--chain`, because that
+runs every deployed chain and mixes testnet data into the report. Omit `--pretty` for JSON. The script
 (`scripts/withdrawal-queue.ts`):
 
 - discovers the hook per chain and reads the two assets from `supportedAssets()`,
