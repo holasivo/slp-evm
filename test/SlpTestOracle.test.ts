@@ -3,7 +3,10 @@ import { buildMakeSlpProtocol, nh, toAddressMap, viem, Ξ } from './helpers.js';
 const DECIMALS = 8;
 const ONE = 100_000_000n; // 1.00 in 8 decimals
 const APY_BPS = 1_000n; // 10% per year
-const YEAR = 365n * 24n * 60n * 60n;
+const DAY = 24n * 60n * 60n;
+const YEAR = 365n * DAY;
+/** The price the feed reports `t` seconds into its first APY segment. */
+const priceAfter = (t: bigint) => ONE + (ONE * APY_BPS * t) / (10_000n * YEAR);
 
 const makeSlpTestOracle = async () => {
   const [owner, ...users] = await viem.getWalletClients();
@@ -25,47 +28,45 @@ describe('SlpTestOracle', () => {
       );
       expect(await feed.read.apyBps()).to.equal(APY_BPS);
       expect(await feed.read.YEAR()).to.equal(YEAR);
+      expect(await feed.read.ROUND_LENGTH()).to.equal(DAY);
     });
 
     it('prices exactly 1 at the deployment timestamp', async () => {
       const { feed, anchor } = await nh.loadFixture(makeSlpTestOracle);
       expect(await feed.read.basePrice()).to.equal(ONE);
       const [roundId, answer, startedAt, updatedAt, answeredInRound] =
-        await feed.read.getRoundData([anchor]);
-      expect(roundId).to.equal(anchor);
+        await feed.read.latestRoundData();
+      expect(roundId).to.equal(anchor / DAY);
       expect(answer).to.equal(ONE);
       expect(startedAt).to.equal(anchor);
       expect(updatedAt).to.equal(anchor);
-      expect(answeredInRound).to.equal(anchor);
+      expect(answeredInRound).to.equal(anchor / DAY);
     });
   });
 
   describe('accrual', () => {
     it('grows linearly to 1 + APY after one year', async () => {
       const { feed, anchor } = await nh.loadFixture(makeSlpTestOracle);
-      expect((await feed.read.getRoundData([anchor + YEAR / 2n]))[1]).to.equal(
-        105_000_000n,
-      );
-      expect((await feed.read.getRoundData([anchor + YEAR]))[1]).to.equal(
-        110_000_000n,
-      );
-      expect((await feed.read.getRoundData([anchor + 3n * YEAR]))[1]).to.equal(
-        130_000_000n,
-      );
+      await nh.time.increaseTo(anchor + YEAR / 2n);
+      expect((await feed.read.latestRoundData())[1]).to.equal(105_000_000n);
+      await nh.time.increaseTo(anchor + YEAR);
+      expect((await feed.read.latestRoundData())[1]).to.equal(110_000_000n);
+      await nh.time.increaseTo(anchor + 3n * YEAR);
+      expect((await feed.read.latestRoundData())[1]).to.equal(130_000_000n);
     });
 
-    it('reports every read as a fresh, complete round', async () => {
+    it("reports today's round, fresh and complete, at every read", async () => {
       const { feed, anchor } = await nh.loadFixture(makeSlpTestOracle);
       await nh.time.increase(Number(YEAR));
       const [roundId, answer, startedAt, updatedAt, answeredInRound] =
         await feed.read.latestRoundData();
       expect(updatedAt >= anchor + YEAR).to.equal(true);
-      expect(roundId).to.equal(updatedAt);
+      expect(roundId).to.equal(updatedAt / DAY);
       expect(startedAt).to.equal(updatedAt);
       expect(answeredInRound).to.equal(roundId);
       // the latest answer is the same curve getRoundData exposes
-      expect(answer).to.equal((await feed.read.getRoundData([updatedAt]))[1]);
-      expect(answer >= 110_000_000n).to.equal(true);
+      expect(answer).to.equal((await feed.read.getRoundData([roundId]))[1]);
+      expect(answer).to.equal(priceAfter(updatedAt - anchor));
     });
   });
 
@@ -84,9 +85,8 @@ describe('SlpTestOracle', () => {
       expect(await feed.read.basePrice()).to.equal(110_000_000n);
       expect(await feed.read.anchor()).to.equal(ts);
       // 1.10 growing at 20%: 1.32 one year later
-      expect((await feed.read.getRoundData([ts + YEAR]))[1]).to.equal(
-        132_000_000n,
-      );
+      await nh.time.increaseTo(ts + YEAR);
+      expect((await feed.read.latestRoundData())[1]).to.equal(132_000_000n);
     });
 
     it('freezes the price at zero APY', async () => {
@@ -94,9 +94,8 @@ describe('SlpTestOracle', () => {
       const ts = anchor + YEAR;
       await nh.time.setNextBlockTimestamp(ts);
       await feed.write.setApy([0n]);
-      expect((await feed.read.getRoundData([ts + 10n * YEAR]))[1]).to.equal(
-        110_000_000n,
-      );
+      await nh.time.increase(Number(10n * YEAR));
+      expect((await feed.read.latestRoundData())[1]).to.equal(110_000_000n);
     });
 
     it('reverts for non-owners', async () => {
@@ -113,13 +112,46 @@ describe('SlpTestOracle', () => {
   });
 
   describe('getRoundData', () => {
-    it('reverts for timestamps before the current APY segment', async () => {
+    // Consumers find the round for a date by walking back one round id at a
+    // time from the latest, as on the daily Chainlink feed.
+    it("walks back one day per round, to each day's last second", async () => {
       const { feed, anchor } = await nh.loadFixture(makeSlpTestOracle);
+      const today = anchor / DAY + 3n;
+      await nh.time.increaseTo(today * DAY + 22n);
+      const [latest] = await feed.read.latestRoundData();
+      expect(latest).to.equal(today);
+      const yesterday = today * DAY - 1n;
+      expect(await feed.read.getRoundData([latest - 1n])).to.deep.equal([
+        today - 1n,
+        priceAfter(yesterday - anchor),
+        yesterday,
+        yesterday,
+        today - 1n,
+      ]);
+      // the deployment day ends after the anchor, so it is still served
+      const first = await feed.read.getRoundData([anchor / DAY]);
+      expect(first[3]).to.equal((anchor / DAY + 1n) * DAY - 1n);
+    });
+
+    it('reverts for days before the current APY segment', async () => {
+      const { feed, anchor } = await nh.loadFixture(makeSlpTestOracle);
+      const before = anchor / DAY - 1n;
       await viem.assertions.revertWithCustomErrorWithArgs(
-        feed.read.getRoundData([anchor - 1n]),
+        feed.read.getRoundData([before]),
         feed,
         'SlpTestOracleNoData',
-        [anchor - 1n],
+        [before],
+      );
+    });
+
+    it('reverts for days to come', async () => {
+      const { feed, anchor } = await nh.loadFixture(makeSlpTestOracle);
+      const tomorrow = anchor / DAY + 1n;
+      await viem.assertions.revertWithCustomErrorWithArgs(
+        feed.read.getRoundData([tomorrow]),
+        feed,
+        'SlpTestOracleNoData',
+        [tomorrow],
       );
     });
   });

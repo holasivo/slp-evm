@@ -3,6 +3,7 @@ pragma solidity 0.8.35;
 
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 /// @title SlpTestOracle - Self-accruing Chainlink-compatible SLP/USD feed
 /// @author Sivo
@@ -10,17 +11,19 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 /// is published: the answer is computed on every read from a configurable
 /// APY. The price is exactly 1 (10^decimals) at deployment and grows linearly
 /// with the time elapsed since, so one year after deployment it reads
-/// 1 + APY. Every read is a fresh round stamped with the current block
-/// timestamp, so the consumers' staleness breaker never trips and no
-/// off-chain publisher has to run.
+/// 1 + APY. The latest round is stamped with the current block timestamp, so
+/// the consumers' staleness breaker never trips and no off-chain publisher
+/// has to run.
 /// @dev The APY is simple interest on the price checkpointed at the last
 /// setApy (the base): price(t) = base * (1 + apyBps/1e4 * (t - anchor)/1yr).
 /// setApy re-anchors at the current price so the curve stays continuous. It
 /// is owner-only so a stray testnet account cannot halt the staging protocol
-/// by pushing the price out of the consumers' band. Round ids are block
-/// timestamps: getRoundData(t) returns the price reported at t for any t in
-/// the current APY segment; earlier timestamps are not reconstructible once
-/// the APY changed and revert.
+/// by pushing the price out of the consumers' band. Round ids are UTC day
+/// numbers (timestamp / 1 day), so walking back one round goes back one day
+/// as on the daily Chainlink feed: the latest round is today's at the current
+/// price, and getRoundData(d) returns the price at the last second of day d.
+/// Days that ended before the current APY segment started are not
+/// reconstructible once the APY changed and revert, as do days to come.
 contract SlpTestOracle is AggregatorV3Interface, Ownable {
     /// @notice Basis points in one unit (100%)
     uint256 public constant BPS = 10_000;
@@ -28,8 +31,11 @@ contract SlpTestOracle is AggregatorV3Interface, Ownable {
     /// @notice Accrual period the APY refers to
     uint256 public constant YEAR = 365 days;
 
-    /// @notice Error thrown when querying a round (timestamp) before the
-    /// current APY segment started
+    /// @notice Time a round spans: round d covers UTC day d
+    uint256 public constant ROUND_LENGTH = 1 days;
+
+    /// @notice Error thrown when querying a round (day) that ended before the
+    /// current APY segment started, or has not started yet
     /// @param roundId The unknown round identifier
     error SlpTestOracleNoData(uint80 roundId);
 
@@ -96,7 +102,8 @@ contract SlpTestOracle is AggregatorV3Interface, Ownable {
     }
 
     /// @inheritdoc AggregatorV3Interface
-    /// @dev roundId_ is a block timestamp within the current APY segment
+    /// @dev roundId_ is a UTC day number; a day that has ended answers its
+    /// last second, today answers now
     function getRoundData(
         uint80 roundId_
     )
@@ -110,8 +117,11 @@ contract SlpTestOracle is AggregatorV3Interface, Ownable {
             uint80 answeredInRound
         )
     {
-        if (roundId_ < _anchor) revert SlpTestOracleNoData(roundId_);
-        return _roundData(roundId_);
+        uint256 end = (uint256(roundId_) + 1) * ROUND_LENGTH - 1;
+        if (end < _anchor || roundId_ > block.timestamp / ROUND_LENGTH) {
+            revert SlpTestOracleNoData(roundId_);
+        }
+        return _roundData(roundId_, Math.min(end, block.timestamp));
     }
 
     /// @inheritdoc AggregatorV3Interface
@@ -126,20 +136,22 @@ contract SlpTestOracle is AggregatorV3Interface, Ownable {
             uint80 answeredInRound
         )
     {
-        return _roundData(uint80(block.timestamp));
+        return
+            _roundData(uint80(block.timestamp / ROUND_LENGTH), block.timestamp);
     }
 
-    /// @dev Rounds are synthesized per timestamp, so startedAt == updatedAt
-    /// == roundId and answeredInRound == roundId
+    /// @dev Rounds are synthesized at a timestamp, so startedAt == updatedAt
+    /// and answeredInRound == roundId
     function _roundData(
-        uint80 timestamp
+        uint80 roundId,
+        uint256 timestamp
     ) private view returns (uint80, int256, uint256, uint256, uint80) {
         return (
-            timestamp,
+            roundId,
             int256(_priceAt(timestamp)),
             timestamp,
             timestamp,
-            timestamp
+            roundId
         );
     }
 

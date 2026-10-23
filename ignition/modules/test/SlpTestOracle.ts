@@ -9,7 +9,11 @@ import { buildModule } from '@nomicfoundation/hardhat-ignition/modules';
 export const SlpTestOracleModule = buildModule('SlpTestOracleModule', (m) => {
   const decimals = m.getParameter('decimals', 8);
   const apyBps = m.getParameter('apy_bps');
-  const oracle = m.contract('SlpTestOracle', [decimals, apyBps]);
+  // SlpTestOracleV2 numbers rounds by UTC day; the sepolia journal records
+  // the first deployment, which numbered them by second, as SlpTestOracle.
+  const oracle = m.contract('SlpTestOracle', [decimals, apyBps], {
+    id: 'SlpTestOracleV2',
+  });
   return { oracle };
 });
 

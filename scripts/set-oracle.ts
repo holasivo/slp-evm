@@ -3,7 +3,7 @@
  * Run AFTER oracle:test.
  *
  * The oracle address is read from the network's Ignition journal
- * (SlpTestOracleModule#SlpTestOracle); the hook address and price band are read from
+ * (SlpTestOracleModule#SlpTestOracleV2); the hook address and price band are read from
  * the network's parameters file (SlpRolesModule.hook and HookProxy), so the
  * cutover cannot drift from the deployed configuration. The caller must hold
  * the MANAGER role on the AccessManager. Idempotent: exits early when the
@@ -59,9 +59,9 @@ async function main(): Promise<void> {
       'utf-8',
     ),
   ) as Record<string, Address>;
-  const oracle = deployed['SlpTestOracleModule#SlpTestOracle'];
+  const oracle = deployed['SlpTestOracleModule#SlpTestOracleV2'];
   if (!oracle)
-    throw new Error('SlpTestOracleModule#SlpTestOracle not deployed');
+    throw new Error('SlpTestOracleModule#SlpTestOracleV2 not deployed');
 
   const hookArtifact = await hre.artifacts.readArtifact('UniswapHook');
   const publicClient = await n.viem.getPublicClient();
